@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>VetLatina — Ветеринарная Латынь PWA</title>
+
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="VetLatina" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#065f46" />
+  <meta name="description" content="Карманный интерактивный тренажер ветеринарной латыни для лекций и анатомикумов." />
+
+  <!-- App Icon as embedded SVG Data URI -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23059669'/%3E%3Cpath d='M30 40 C30 35, 35 30, 40 30 C45 30, 50 35, 50 40 C50 45, 45 50, 40 50 C35 50, 30 45, 30 40 Z' fill='white'/%3E%3Ccircle cx='65' cy='36' r='9' fill='white'/%3E%3Ccircle cx='25' cy='52' r='7' fill='white'/%3E%3Ccircle cx='75' cy='52' r='7' fill='white'/%3E%3Cpath d='M35 60 C30 65, 32 78, 50 82 C68 78, 70 65, 65 60 C60 55, 40 55, 35 60 Z' fill='white'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23059669'/%3E%3Cpath d='M30 40 C30 35, 35 30, 40 30 C45 30, 50 35, 50 40 C50 45, 45 50, 40 50 C35 50, 30 45, 30 40 Z' fill='white'/%3E%3Ccircle cx='65' cy='36' r='9' fill='white'/%3E%3Ccircle cx='25' cy='52' r='7' fill='white'/%3E%3Ccircle cx='75' cy='52' r='7' fill='white'/%3E%3Cpath d='M35 60 C30 65, 32 78, 50 82 C68 78, 70 65, 65 60 C60 55, 40 55, 35 60 Z' fill='white'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti & Embedded QR Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Inline Web App Manifest Injection -->
+  <script>
+    (function injectManifest() {
+      const manifestObj = {
+        name: "VetLatina — Ветеринарная Латынь",
+        short_name: "VetLatina",
+        description: "Офлайн-тренажер латинского языка для ветеринарных врачей и студентов",
+        start_url: window.location.href,
+        display: "standalone",
+        background_color: "#0f172a",
+        theme_color: "#065f46",
+        orientation: "portrait",
+        icons: [
+          {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23059669'/%3E%3Ccircle cx='35' cy='38' r='9' fill='white'/%3E%3Ccircle cx='65' cy='38' r='9' fill='white'/%3E%3Ccircle cx='23' cy='53' r='7' fill='white'/%3E%3Ccircle cx='77' cy='53' r='7' fill='white'/%3E%3Cpath d='M35 62 C30 68, 33 80, 50 82 C67 80, 70 68, 65 62 C59 56, 41 56, 35 62 Z' fill='white'/%3E%3C/svg%3E",
+            sizes: "192x192 512x512",
+            type: "image/svg+xml",
+            purpose: "any maskable"
+          }
+        ]
+      };
+      const stringManifest = JSON.stringify(manifestObj);
+      const blob = new Blob([stringManifest], {type: 'application/json'});
+      const manifestURL = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestURL;
+      document.head.appendChild(link);
+    })();
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    .latin-serif {
+      font-family: 'Cinzel', serif;
+    }
+    /* 3D Flip Effects */
+    .perspective-card {
+      perspective: 1000px;
+    }
+    .card-flipper {
+      transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .card-flipper.flipped {
+      transform: rotateY(180deg);
+    }
+    .frontside, .backside {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .backside {
+      transform: rotateY(180deg);
+    }
+    /* Smooth Touch Press Effect */
+    .tap-scale {
+      transition: transform 0.1s ease, background-color 0.15s ease;
+    }
+    .tap-scale:active {
+      transform: scale(0.96);
+    }
+    /* Hide scrollbars on mobile pills */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Swipe hints */
+    @keyframes pulseHint {
+      0%, 100% { opacity: 0.6; transform: translateX(0); }
+      50% { opacity: 1; transform: translateX(5px); }
+    }
+    .animate-swipe {
+      animation: pulseHint 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white select-none">
+
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchNav('hub')">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <i data-lucide="paw-print" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-extrabold text-base tracking-tight text-white">Vet<span class="text-emerald-400">Latina</span></span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">PWA</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-medium">Анатомия & Клиника</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAudio()" id="btnAudio" class="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white tap-scale" title="Звук">
+          <i id="audioIcon" data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i>
+        </button>
+        <button onclick="openSyncModal()" class="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-emerald-400 tap-scale flex items-center gap-1 text-xs" title="Синхронизация с ПК/Телефоном">
+          <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i>
+          <span class="hidden sm:inline font-semibold">Синхрон</span>
+        </button>
+        <button onclick="openInstallModal()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tap-scale flex items-center gap-1 shadow-md shadow-emerald-600/30">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+          <span class="hidden xs:inline">На телефон</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Category Pills Horizontal Carousel -->
+    <div class="max-w-3xl mx-auto mt-2.5 overflow-x-auto no-scrollbar flex items-center gap-2 py-0.5" id="categoryPills">
+      <!-- Injected via JavaScript -->
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 pt-3 pb-8">
+
+    <!-- Toast Notification Banner -->
+    <div id="appToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 bg-emerald-600 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-emerald-400/40 text-xs font-semibold max-w-[90vw]">
+      <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+      <span id="appToastText">Уведомление</span>
+    </div>
+
+    <!-- ================= VIEW 1: HUB / HOME ================= -->
+    <section id="view-hub" class="space-y-4">
+      <!-- Offline & Lecture Ready Card -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900/90 via-teal-900/70 to-slate-950 p-5 border border-emerald-500/30 shadow-xl">
+        <div class="relative z-10 space-y-2">
+          <div class="flex items-center gap-2 text-xs font-bold text-emerald-300">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-ping"></span> 100% Офлайн
+            </span>
+            <span>• Для пар и аудиторий</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+            Карманный практикум латыни
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-md">
+            Добавляй термины с доски за секунду, учи на перемене в карточках и делись своим словарем с однокурсниками без интернета!
+          </p>
+
+          <div class="pt-2 flex flex-wrap gap-2">
+            <button onclick="startMode('cards')" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 tap-scale flex items-center gap-1.5">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> Тренировать карточки
+            </button>
+            <button onclick="openWordModal()" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs tap-scale flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Записать термин
+            </button>
+          </div>
+        </div>
+
+        <div class="absolute -right-4 -bottom-6 opacity-10 pointer-events-none">
+          <i data-lucide="stethoscope" class="w-44 h-44 text-white"></i>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Counters -->
+      <div class="grid grid-cols-4 gap-2 text-center">
+        <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div id="statTotal" class="text-lg sm:text-xl font-extrabold text-white">0</div>
+          <div class="text-[10px] text-slate-400 font-medium">Всего слов</div>
+        </div>
+        <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div id="statMastered" class="text-lg sm:text-xl font-extrabold text-emerald-400">0</div>
+          <div class="text-[10px] text-slate-400 font-medium">Выучено</div>
+        </div>
+        <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div id="statStreak" class="text-lg sm:text-xl font-extrabold text-amber-400">0🔥</div>
+          <div class="text-[10px] text-slate-400 font-medium">Серия</div>
+        </div>
+        <div class="p-3 bg-slate-800/80 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div id="statAccuracy" class="text-lg sm:text-xl font-extrabold text-teal-300">100%</div>
+          <div class="text-[10px] text-slate-400 font-medium">Точность</div>
+        </div>
+      </div>
+
+      <!-- Mobile Training Modes List -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Режимы тренировки</h2>
+          <span class="text-[11px] text-emerald-400 font-medium" id="selectedCatIndicator">Все темы</span>
+        </div>
+
+        <!-- Mode 1: Flashcards -->
+        <div onclick="startMode('cards')" class="p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 active:border-emerald-500 flex items-center justify-between cursor-pointer tap-scale shadow-sm">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 border border-emerald-500/30">
+              <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">3D Карточки со свайпами</div>
+              <p class="text-xs text-slate-400">Повторение свайпами влево/вправо и переворотом</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+        </div>
+
+        <!-- Mode 2: Quiz -->
+        <div onclick="startMode('quiz')" class="p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 active:border-emerald-500 flex items-center justify-between cursor-pointer tap-scale shadow-sm">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center flex-shrink-0 border border-teal-500/30">
+              <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Тест: 4 варианта</div>
+              <p class="text-xs text-slate-400">Быстрый опрос на знание точных ветеринарных терминов</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+        </div>
+
+        <!-- Mode 3: Spelling -->
+        <div onclick="startMode('typing')" class="p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 active:border-emerald-500 flex items-center justify-between cursor-pointer tap-scale shadow-sm">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center flex-shrink-0 border border-sky-500/30">
+              <i data-lucide="pen-tool" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Спеллинг и окончания</div>
+              <p class="text-xs text-slate-400">Письменный ввод для выработки мышечной памяти</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+        </div>
+
+        <!-- Mode 4: Match -->
+        <div onclick="startMode('match')" class="p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700/80 active:border-emerald-500 flex items-center justify-between cursor-pointer tap-scale shadow-sm">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/30">
+              <i data-lucide="puzzle" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Найди пару (Спринт)</div>
+              <p class="text-xs text-slate-400">Соединение латинских пар на скорость и реакцию</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: FLASHCARDS ================= -->
+    <section id="view-cards" class="hidden space-y-4">
+      <div class="flex items-center justify-between px-1">
+        <button onclick="switchNav('hub')" class="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1 tap-scale">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Главное меню
+        </button>
+        <span id="cardCounter" class="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-2 py-0.5 rounded-md">1 / 10</span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+        <div id="cardProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+      </div>
+
+      <!-- Touch Swipeable 3D Card -->
+      <div id="cardSwipeContainer" class="perspective-card w-full h-[360px] sm:h-[400px] cursor-pointer touch-none" onclick="flipCard()">
+        <div id="cardFlipper" class="card-flipper relative w-full h-full shadow-2xl rounded-3xl">
+          
+          <!-- FRONT: Latin Term & Grammar -->
+          <div class="frontside absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-2 border-slate-700/90 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span id="cardBadgeFront" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Анатомия
+              </span>
+              <span id="cardGrammarFront" class="text-[11px] font-mono text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-md border border-slate-700">
+                m, -i
+              </span>
+            </div>
+
+            <div class="text-center my-auto space-y-2">
+              <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Латинский термин</div>
+              <h3 id="cardLatinText" class="latin-serif text-2xl sm:text-3xl font-bold text-white px-2 leading-snug">
+                Musculus biceps brachii
+              </h3>
+              <div class="text-xs text-emerald-400/80 font-medium">нажмите для переворота карточки</div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800 pt-3">
+              <span class="flex items-center gap-1"><i data-lucide="arrow-left" class="w-3 h-3 text-rose-400"></i> свайп влево: повторить</span>
+              <span class="flex items-center gap-1">свайп вправо: знаю <i data-lucide="arrow-right" class="w-3 h-3 text-emerald-400"></i></span>
+            </div>
+          </div>
+
+          <!-- BACK: Russian & Veterinary Notes -->
+          <div class="backside absolute inset-0 bg-gradient-to-b from-emerald-950 to-slate-950 rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-2 border-emerald-500/50 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span id="cardBadgeBack" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                Анатомия
+              </span>
+              <span class="text-[11px] text-emerald-400/80 font-semibold flex items-center gap-1">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> обратно
+              </span>
+            </div>
+
+            <div class="text-center my-auto space-y-3">
+              <div class="text-[10px] uppercase font-bold tracking-widest text-emerald-400">Русский перевод</div>
+              <h3 id="cardRussianText" class="text-xl sm:text-2xl font-bold text-white px-2">
+                Двуглавая мышца плеча
+              </h3>
+              <div id="cardNotesBox" class="bg-black/30 rounded-2xl p-3 text-xs text-slate-300 border border-white/10 max-w-sm mx-auto text-left">
+                <span class="text-emerald-300 font-bold block mb-0.5">Ветеринарная заметка:</span>
+                <span id="cardNotesText">Сгибает локтевой сустав и разгибает плечевой.</span>
+              </div>
+            </div>
+
+            <div class="text-center text-[11px] text-slate-400 border-t border-emerald-900/60 pt-3">
+              Кликните карточку или используйте кнопки ниже
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Action Buttons for Mobile Thumbs -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button onclick="reviewCard(false)" class="py-3.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-750 text-rose-300 border border-rose-500/30 font-bold text-sm flex items-center justify-center gap-2 tap-scale shadow-md">
+          <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i>
+          <span>На повторение</span>
+        </button>
+        <button onclick="reviewCard(true)" class="py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 tap-scale shadow-lg shadow-emerald-600/30">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Знаю отлично</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-400 px-2">
+        <button onclick="shuffleCards()" class="hover:text-emerald-400 flex items-center gap-1 tap-scale">
+          <i data-lucide="shuffle" class="w-3.5 h-3.5"></i> Перемешать
+        </button>
+        <span class="text-[11px]">Можно листать кнопками громкости (Android)</span>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 3: QUIZ ================= -->
+    <section id="view-quiz" class="hidden space-y-4">
+      <div class="flex items-center justify-between px-1">
+        <button onclick="switchNav('hub')" class="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1 tap-scale">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> В меню
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <i data-lucide="flame" class="w-3.5 h-3.5 fill-amber-400"></i> <span id="quizComboCount">0</span>
+          </span>
+          <span id="quizScoreDisplay" class="text-xs font-mono text-slate-300 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">0 / 0</span>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-gradient-to-b from-slate-800 to-slate-850 rounded-3xl p-6 sm:p-7 border border-slate-700/80 shadow-md text-center space-y-2">
+        <div class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30" id="quizCatBadge">
+          Остеология
+        </div>
+        <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Выберите точный перевод:</div>
+        <h2 id="quizTerm" class="latin-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
+          Os femoris
+        </h2>
+        <div id="quizGenderGrammar" class="text-xs font-mono text-slate-400">n, 3-е скл.</div>
+      </div>
+
+      <!-- Options Container -->
+      <div id="quizOptionsList" class="grid grid-cols-1 gap-2.5">
+        <!-- Injected options -->
+      </div>
+
+      <!-- Next question button -->
+      <button id="quizNextBtn" onclick="generateQuizQuestion()" class="hidden w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tap-scale shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+        <span>Следующий термин</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </section>
+
+    <!-- ================= VIEW 4: TYPING ================= -->
+    <section id="view-typing" class="hidden space-y-4">
+      <div class="flex items-center justify-between px-1">
+        <button onclick="switchNav('hub')" class="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1 tap-scale">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> В меню
+        </button>
+        <span class="text-[11px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2.5 py-1 rounded-full">
+          Письменный тренажер
+        </span>
+      </div>
+
+      <div class="bg-gradient-to-b from-slate-800 to-slate-850 rounded-3xl p-6 border border-slate-700 shadow-md text-center space-y-2">
+        <span id="typingCatBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300">
+          Спланхнология
+        </span>
+        <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Напишите термин на латыни:</div>
+        <h2 id="typingTargetRussian" class="text-2xl font-bold text-white">
+          Печень
+        </h2>
+        <p id="typingHintGrammar" class="text-xs text-slate-400 font-mono">род: n, греч. корень</p>
+      </div>
+
+      <form onsubmit="checkTypingAnswer(event)" class="space-y-3">
+        <div class="relative">
+          <input
+            type="text"
+            id="typingInputBox"
+            autocapitalize="none"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            placeholder="Введи латинский термин..."
+            class="w-full text-center text-lg font-semibold py-3.5 px-4 rounded-2xl bg-slate-800 border-2 border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+          />
+          <button type="button" onclick="giveTypingHintLetter()" class="absolute right-3 top-3 p-1.5 text-slate-400 hover:text-amber-300 tap-scale" title="Подсказать букву">
+            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Quick Latin Character bar for mobile -->
+        <div class="flex items-center justify-center gap-1.5 text-xs text-slate-400 flex-wrap">
+          <span class="text-[10px] uppercase font-bold">Спецбуквы:</span>
+          <button type="button" onclick="insertTypingLetter('æ')" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 font-mono text-white tap-scale">æ</button>
+          <button type="button" onclick="insertTypingLetter('œ')" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 font-mono text-white tap-scale">œ</button>
+          <button type="button" onclick="insertTypingLetter('ii')" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 font-mono text-white tap-scale">ii</button>
+          <button type="button" onclick="insertTypingLetter('ae')" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 font-mono text-white tap-scale">ae</button>
+        </div>
+
+        <div id="typingFeedbackBox" class="hidden p-3 rounded-2xl text-xs font-semibold"></div>
+
+        <div class="flex gap-2">
+          <button type="submit" id="btnTypingCheck" class="flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tap-scale shadow-md">
+            Проверить
+          </button>
+          <button type="button" id="btnTypingNext" onclick="setupNextTyping()" class="hidden flex-1 py-3.5 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm tap-scale">
+            Дальше <i data-lucide="arrow-right" class="w-4 h-4 inline"></i>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ================= VIEW 5: MATCH GAME ================= -->
+    <section id="view-match" class="hidden space-y-4">
+      <div class="flex items-center justify-between px-1">
+        <button onclick="switchNav('hub')" class="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1 tap-scale">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> В меню
+        </button>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono text-emerald-400 flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i> <span id="matchTimerText">00:00</span>
+          </span>
+          <button onclick="startMatchGame()" class="p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 tap-scale">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-200 flex items-center justify-between">
+        <span>Найди пару: латынь и русский перевод!</span>
+        <span class="font-bold font-mono" id="matchPairsCount">0 пар</span>
+      </div>
+
+      <div id="matchTilesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <!-- Dynamic match cards -->
+      </div>
+    </section>
+
+    <!-- ================= VIEW 6: DICTIONARY ================= -->
+    <section id="view-dict" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="book-marked" class="w-5 h-5 text-emerald-400"></i> База латыни
+          </h2>
+          <p class="text-xs text-slate-400">Все слова сохранены в памяти телефона</p>
+        </div>
+        <button onclick="openWordModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tap-scale flex items-center gap-1 shadow-md">
+          <i data-lucide="plus" class="w-4 h-4"></i> Добавить
+        </button>
+      </div>
+
+      <!-- Search Box -->
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+        <input
+          type="text"
+          id="dictSearchBox"
+          oninput="renderDictList()"
+          placeholder="Поиск по латыни или переводу..."
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-2xl text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500"
+        />
+      </div>
+
+      <!-- Term List Cards -->
+      <div id="dictWordsList" class="space-y-2">
+        <!-- Rendered via JS -->
+      </div>
+      <div id="dictEmptyPrompt" class="hidden text-center p-8 text-slate-500 text-xs">
+        Слова не найдены. Нажми «Добавить», чтобы записать новый термин!
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar (iOS / Android App Style) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 pb-[env(safe-area-inset-bottom)]">
+    <div class="max-w-3xl mx-auto flex items-center justify-around px-2 py-2">
+      <button onclick="switchNav('hub')" id="nav-hub" class="nav-btn flex flex-col items-center gap-0.5 text-emerald-400 tap-scale flex-1">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Меню</span>
+      </button>
+      <button onclick="startMode('cards')" id="nav-cards" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-400 tap-scale flex-1">
+        <i data-lucide="layers" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">Карточки</span>
+      </button>
+      <button onclick="startMode('quiz')" id="nav-quiz" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-400 tap-scale flex-1">
+        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">Тест</span>
+      </button>
+      <button onclick="startMode('match')" id="nav-match" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-400 tap-scale flex-1">
+        <i data-lucide="puzzle" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">Пары</span>
+      </button>
+      <button onclick="switchNav('dict')" id="nav-dict" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-400 tap-scale flex-1">
+        <i data-lucide="book" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">Словарь</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL 1: ADD / EDIT WORD -->
+  <div id="modalWord" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-850 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-700 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 id="modalWordTitle" class="text-base font-bold text-white">Добавить термин</h3>
+        <button onclick="closeWordModal()" class="p-1 text-slate-400 hover:text-white tap-scale">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="saveWordForm(event)" class="space-y-3">
+        <input type="hidden" id="formWordId" value="" />
+
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Латинский термин *</label>
+          <input
+            type="text"
+            id="formLatin"
+            required
+            placeholder="например, Arteria carotis communis"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-emerald-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Русский перевод *</label>
+          <input
+            type="text"
+            id="formRussian"
+            required
+            placeholder="например, Общая сонная артерия"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-emerald-500 focus:outline-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Категория *</label>
+            <input
+              type="text"
+              id="formCategory"
+              required
+              list="categorySuggestions"
+              placeholder="Анатомия, Остеология..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-emerald-500 focus:outline-none"
+            />
+            <datalist id="categorySuggestions">
+              <option value="Анатомия"></option>
+              <option value="Остеология"></option>
+              <option value="Миология"></option>
+              <option value="Виды животных"></option>
+              <option value="Топография и плоскости"></option>
+              <option value="Спланхнология"></option>
+              <option value="Клиническая латынь"></option>
+            </datalist>
+          </div>
+
+          <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Род / Склонение</label>
+            <input
+              type="text"
+              id="formGrammar"
+              placeholder="f, -ae / m, -i"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-emerald-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Ветеринарная заметка</label>
+          <textarea
+            id="formNotes"
+            rows="2"
+            placeholder="Особенности у жвачных, ветви, синтопия..."
+            class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-emerald-500 focus:outline-none"
+          ></textarea>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeWordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs tap-scale">
+            Отмена
+          </button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tap-scale shadow-md">
+            Сохранить
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SYNC BETWEEN PC AND PHONE VIA QR & CLIPBOARD -->
+  <div id="modalSync" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-850 w-full max-w-md rounded-3xl border border-slate-700 p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="refresh-cw" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-base font-bold text-white">Перенос: ПК ⇄ Телефон</h3>
+        </div>
+        <button onclick="closeSyncModal()" class="p-1 text-slate-400 hover:text-white tap-scale">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Step 1: Telegram/WhatsApp one-click sync -->
+      <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-700/80 space-y-2.5">
+        <div class="flex items-center gap-2 text-xs font-bold text-emerald-300">
+          <i data-lucide="clipboard-copy" class="w-4 h-4"></i> Способ 1: Скопировать в Избранное
+        </div>
+        <p class="text-[11px] text-slate-400 leading-normal">
+          Нажми на компьютере «Скопировать базу», вставь себе в «Избранное» в Telegram, а на телефоне нажми «Вставить из буфера».
+        </p>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="copyAllWordsToClipboard()" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tap-scale flex items-center justify-center gap-1.5 shadow">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Скопировать всё
+          </button>
+          <button onclick="pasteWordsFromClipboard()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs tap-scale flex items-center justify-center gap-1.5">
+            <i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i> Вставить
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: QR-code transfer on screen -->
+      <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-700/80 space-y-2.5 text-center">
+        <div class="flex items-center justify-center gap-2 text-xs font-bold text-teal-300">
+          <i data-lucide="qr-code" class="w-4 h-4"></i> Способ 2: QR-код со словарем
+        </div>
+        <p class="text-[11px] text-slate-400 leading-normal">
+          Сгенерируй QR-код прямо на мониторе компьютера и наведи камеру телефона:
+        </p>
+        <button onclick="generateSyncQR()" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-emerald-300 border border-emerald-500/30 text-xs font-semibold tap-scale">
+          Показать QR-код словаря
+        </button>
+        <div id="qrContainer" class="hidden flex flex-col items-center pt-2">
+          <div id="qrCanvas" class="bg-white p-3 rounded-2xl shadow-lg"></div>
+          <span class="text-[10px] text-slate-400 mt-2">Камера телефона распознает JSON с терминами</span>
+        </div>
+      </div>
+
+      <!-- Step 3: Standard File Export / Import -->
+      <div class="flex items-center justify-between pt-1">
+        <button onclick="exportJSONFile()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 tap-scale">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Скачать файл .json
+        </button>
+        <label class="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer tap-scale">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i> Загрузить файл
+          <input type="file" accept=".json" onchange="importJSONFile(event)" class="hidden" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: HOW TO INSTALL PWA ON IPHONE / ANDROID -->
+  <div id="modalInstall" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-850 w-full max-w-md rounded-3xl border border-slate-700 p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="smartphone" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-base font-bold text-white">Установка на телефон</h3>
+        </div>
+        <button onclick="closeInstallModal()" class="p-1 text-slate-400 hover:text-white tap-scale">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1.5">
+          <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+            <i data-lucide="apple" class="w-4 h-4"></i> На iPhone (Safari):
+          </span>
+          <ol class="list-decimal list-inside text-slate-300 space-y-1 pl-1 text-[11px]">
+            <li>Открой эту страницу в браузере <b>Safari</b>.</li>
+            <li>Нажми внизу кнопку <b>«Поделиться»</b> (квадрат со стрелкой вверх <i data-lucide="share" class="w-3 h-3 inline"></i>).</li>
+            <li>Прокрути вниз и нажми <b>«На экран „Домой“»</b>.</li>
+            <li>Готово! VetLatina появится как отдельное приложение без рамок браузера.</li>
+          </ol>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1.5">
+          <span class="font-bold text-teal-400 flex items-center gap-1.5">
+            <i data-lucide="play" class="w-4 h-4"></i> На Android (Chrome / Яндекс):
+          </span>
+          <ol class="list-decimal list-inside text-slate-300 space-y-1 pl-1 text-[11px]">
+            <li>Нажми три точки <i data-lucide="more-vertical" class="w-3 h-3 inline"></i> в правом верхнем углу браузера.</li>
+            <li>Выбери <b>«Установить приложение»</b> или <b>«Добавить на главный экран»</b>.</li>
+            <li>Иконка появится на рабочем столе и будет открываться моментально в офлайн-режиме.</li>
+          </ol>
+        </div>
+      </div>
+
+      <button id="pwaInstallPromptBtn" onclick="triggerAndroidPWAInstall()" class="hidden w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tap-scale shadow-md">
+        Установить в 1 клик
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* Rich Starter Veterinary & Anatomical Dictionary */
+    const STARTER_VET_WORDS = [
+      // 1. ANATOMY & OSTEOLOGY
+      { id: "v1", latin: "Os femoris", russian: "Бедренная кость", category: "Остеология", grammar: "n, 3 скл.", notes: "Крупная трубчатая кость тазовой конечности; имеет головку caput ossis femoris.", known: false },
+      { id: "v2", latin: "Scapula", russian: "Лопатка", category: "Остеология", grammar: "f, 1 скл.", notes: "Пояс грудной конечности; имеет ость spina scapulae.", known: false },
+      { id: "v3", latin: "Humerus", russian: "Плечевая кость", category: "Остеология", grammar: "m, 2 скл.", notes: "Трубчатая кость плечевого пояса.", known: false },
+      { id: "v4", latin: "Vertebra cervicalis", russian: "Шейный позвонок", category: "Остеология", grammar: "f, 1 скл.", notes: "У всех млекопитающих ровно 7 шейных позвонков.", known: false },
+      { id: "v5", latin: "Atlas", russian: "Атлант (1-й шейный позвонок)", category: "Остеология", grammar: "m, 3 скл.", notes: "Лишен тела; имеет крылья alae atlantis.", known: false },
+
+      // 2. MYOLOGY & ARTHROLOGY
+      { id: "v6", latin: "Musculus biceps brachii", russian: "Двуглавая мышца плеча", category: "Миология", grammar: "m, 2 скл.", notes: "Сгибает локтевой сустав, фиксирует плечевой при стоянии.", known: false },
+      { id: "v7", latin: "Musculus latissimus dorsi", russian: "Широчайшая мышца спины", category: "Миология", grammar: "m, 2 скл.", notes: "Тянет грудную конечность назад.", known: false },
+      { id: "v8", latin: "Articulatio genus", russian: "Коленный сустав", category: "Артрология", grammar: "f, 3 скл. + n, 4", notes: "Сложный сустав: articulatio femorotibialis и femoropatellaris.", known: false },
+
+      // 3. ANIMAL SPECIES
+      { id: "v9", latin: "Equus caballus", russian: "Лошадь домашняя", category: "Виды животных", grammar: "m, 2 скл.", notes: "Однокопытное непарнокопытное млекопитающее.", known: false },
+      { id: "v10", latin: "Bos taurus", russian: "Крупный рогатый скот (корова)", category: "Виды животных", grammar: "m, 3 скл.", notes: "Парнокопытное жвачное животное.", known: false },
+      { id: "v11", latin: "Canis lupus familiaris", russian: "Собака домашняя", category: "Виды животных", grammar: "m, 3 скл.", notes: "Семейство псовых (Canidae).", known: false },
+      { id: "v12", latin: "Felis catus", russian: "Кошка домашняя", category: "Виды животных", grammar: "f, 3 скл.", notes: "Семейство кошачьих (Felidae).", known: false },
+      { id: "v13", latin: "Sus scrofa domesticus", russian: "Свинья домашняя", category: "Виды животных", grammar: "m, 3 скл.", notes: "Нежвачное парнокопытное; всеядное.", known: false },
+      { id: "v14", latin: "Ovis aries", russian: "Овца домашняя", category: "Виды животных", grammar: "f, 3 скл.", notes: "Мелкий рогатый скот (МРС).", known: false },
+
+      // 4. TOPOGRAPHY & PLANES
+      { id: "v15", latin: "Cranialis", russian: "Краниальный (к голове)", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Направленный в сторону черепа/головы.", known: false },
+      { id: "v16", latin: "Caudalis", russian: "Каудальный (к хвосту)", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Направленный в сторону хвоста.", known: false },
+      { id: "v17", latin: "Dorsalis", russian: "Дорсальный (спинной)", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Ориентированный к спине животного.", known: false },
+      { id: "v18", latin: "Ventralis", russian: "Вентральный (брюшной)", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Ориентированный к брюху/нижней поверхности тела.", known: false },
+      { id: "v19", latin: "Proximalis", russian: "Проксимальный", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Ближе к туловищу вдоль конечности.", known: false },
+      { id: "v20", latin: "Distalis", russian: "Дистальный", category: "Топография и плоскости", grammar: "adj, 3 скл.", notes: "Дальше от туловища вдоль конечности.", known: false },
+
+      // 5. INTERNAL ORGANS & CLINICAL
+      { id: "v21", latin: "Rumen", russian: "Рубец (первый отдел желудка)", category: "Спланхнология", grammar: "n, 3 скл.", notes: "Крупнейший отдел преджелудков жвачных.", known: false },
+      { id: "v22", latin: "Reticulum", russian: "Сетка (второй отдел желудка)", category: "Спланхнология", grammar: "n, 2 скл.", notes: "Ячеистое строение слизистой; риск травматического ретикулита.", known: false },
+      { id: "v23", latin: "Omasum", russian: "Книжка (третий отдел)", category: "Спланхнология", grammar: "n, 2 скл.", notes: "Листовидные складки слизистой.", known: false },
+      { id: "v24", latin: "Abomasum", russian: "Сычуг (истинный желудок)", category: "Спланхнология", grammar: "n, 2 скл.", notes: "Железистый желудок жвачных.", known: false },
+      { id: "v25", latin: "Fractura", russian: "Перелом", category: "Клиническая латынь", grammar: "f, 1 скл.", notes: "Нарушение анатомической целостности кости.", known: false },
+      { id: "v26", latin: "Solutio", russian: "Раствор", category: "Клиническая латынь", grammar: "f, 3 скл.", notes: "Лекарственная форма; Recipe: Solutionis...", known: false }
+    ];
+
+    /* App Global State */
+    const APP = {
+      words: [],
+      filterCat: 'all',
+      sound: true,
+      deferredPrompt: null,
+      stats: { totalAnswered: 0, correct: 0, streak: 0 },
+      // Flashcards
+      cards: { list: [], index: 0, flipped: false },
+      // Quiz
+      quiz: { current: null, answered: false },
+      // Typing
+      typing: { current: null },
+      // Match
+      match: { tiles: [], first: null, left: 0, timer: null, sec: 0 }
+    };
+
+    /* Web Audio API Synthesizer (No external MP3s needed) */
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) audioCtx = new AudioClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playBeep(freq, type, dur, delay = 0) {
+      if (!APP.sound) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        setTimeout(() => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          gain.gain.setValueAtTime(0.06, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + dur);
+        }, delay);
+      } catch (e) {
+        console.warn("Audio unavailable", e);
+      }
+    }
+
+    function soundSuccess() {
+      playBeep(523.25, 'triangle', 0.1, 0);   // C5
+      playBeep(659.25, 'triangle', 0.18, 90); // E5
+      playBeep(783.99, 'triangle', 0.25, 180);// G5
+    }
+
+    function soundError() {
+      playBeep(230, 'sawtooth', 0.15, 0);
+      playBeep(180, 'sawtooth', 0.2, 100);
+    }
+
+    function soundTap() {
+      playBeep(420, 'sine', 0.04, 0);
+    }
+
+    function toggleAudio() {
+      APP.sound = !APP.sound;
+      const icon = document.getElementById('audioIcon');
+      if (APP.sound) {
+        icon.setAttribute('data-lucide', 'volume-2');
+        showToast("Звук включен 🔊");
+      } else {
+        icon.setAttribute('data-lucide', 'volume-x');
+        showToast("Режим без звука 🔇");
+      }
+      lucide.createIcons();
+    }
+
+    /* Local Storage Management */
+    function loadStorage() {
+      try {
+        const raw = localStorage.getItem('vetlatina_pwa_words_v2');
+        if (raw) {
+          APP.words = JSON.parse(raw);
+        } else {
+          APP.words = [...STARTER_VET_WORDS];
+          saveStorage();
+        }
+      } catch (e) {
+        APP.words = [...STARTER_VET_WORDS];
+      }
+    }
+
+    function saveStorage() {
+      try {
+        localStorage.setItem('vetlatina_pwa_words_v2', JSON.stringify(APP.words));
+      } catch (e) {
+        console.error("Save error", e);
+      }
+      updateMetrics();
+      renderCategoryPills();
+    }
+
+    function updateMetrics() {
+      const total = APP.words.length;
+      const mastered = APP.words.filter(w => w.known).length;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statMastered').textContent = mastered;
+      document.getElementById('statStreak').textContent = `${APP.stats.streak}🔥`;
+      
+      const acc = APP.stats.totalAnswered > 0
+        ? Math.round((APP.stats.correct / APP.stats.totalAnswered) * 100)
+        : 100;
+      document.getElementById('statAccuracy').textContent = `${acc}%`;
+    }
+
+    function getActiveCategoryWords() {
+      if (APP.filterCat === 'all') return APP.words;
+      return APP.words.filter(w => w.category === APP.filterCat);
+    }
+
+    function renderCategoryPills() {
+      const container = document.getElementById('categoryPills');
+      const cats = Array.from(new Set(APP.words.map(w => w.category))).filter(Boolean).sort();
+      
+      let html = `
+        <button onclick="setCategoryFilter('all')" class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap tap-scale transition border ${
+          APP.filterCat === 'all'
+            ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+            : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+        }">Все (${APP.words.length})</button>
+      `;
+
+      cats.forEach(c => {
+        const count = APP.words.filter(w => w.category === c).length;
+        const isActive = APP.filterCat === c;
+        html += `
+          <button onclick="setCategoryFilter('${escapeAttr(c)}')" class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap tap-scale transition border ${
+            isActive
+              ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+              : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+          }">${escapeHtml(c)} (${count})</button>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('selectedCatIndicator').textContent = APP.filterCat === 'all' ? 'Все темы' : APP.filterCat;
+    }
+
+    function setCategoryFilter(cat) {
+      soundTap();
+      APP.filterCat = cat;
+      renderCategoryPills();
+      showToast(`Выбрана категория: ${cat === 'all' ? 'Все темы' : cat}`);
+    }
+
+    /* Screen Navigation Switching */
+    function switchNav(viewName) {
+      soundTap();
+      const views = ['hub', 'cards', 'quiz', 'typing', 'match', 'dict'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const activeEl = document.getElementById(`view-${viewName}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      // Update bottom nav bar buttons
+      const navButtons = document.querySelectorAll('.nav-btn');
+      navButtons.forEach(btn => {
+        btn.classList.remove('text-emerald-400');
+        btn.classList.add('text-slate-400');
+      });
+
+      const currentNavBtn = document.getElementById(`nav-${viewName}`);
+      if (currentNavBtn) {
+        currentNavBtn.classList.remove('text-slate-400');
+        currentNavBtn.classList.add('text-emerald-400');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (viewName === 'dict') renderDictList();
+      lucide.createIcons();
+    }
+
+    function startMode(mode) {
+      const words = getActiveCategoryWords();
+      if (words.length === 0) {
+        showToast("В этой теме пока нет терминов! Выберите 'Все'.");
+        return;
+      }
+      switchNav(mode);
+      if (mode === 'cards') initCardsMode();
+      if (mode === 'quiz') startQuizMode();
+      if (mode === 'typing') startTypingMode();
+      if (mode === 'match') startMatchGame();
+    }
+
+    /* ================= 1. FLASHCARDS WITH SWIPE GESTURES ================= */
+    function initCardsMode() {
+      APP.cards.list = [...getActiveCategoryWords()];
+      APP.cards.index = 0;
+      APP.cards.flipped = false;
+      renderCurrentCard();
+      setupCardSwipeEvents();
+    }
+
+    function renderCurrentCard() {
+      const flipper = document.getElementById('cardFlipper');
+      flipper.classList.remove('flipped');
+      APP.cards.flipped = false;
+
+      const list = APP.cards.list;
+      if (!list || list.length === 0) return;
+
+      const word = list[APP.cards.index];
+      const idx = APP.cards.index;
+
+      document.getElementById('cardBadgeFront').textContent = word.category;
+      document.getElementById('cardBadgeBack').textContent = word.category;
+      document.getElementById('cardGrammarFront').textContent = word.grammar || '—';
+      document.getElementById('cardLatinText').textContent = word.latin;
+      document.getElementById('cardRussianText').textContent = word.russian;
+
+      const notesBox = document.getElementById('cardNotesBox');
+      if (word.notes && word.notes.trim() !== '') {
+        notesBox.classList.remove('hidden');
+        document.getElementById('cardNotesText').textContent = word.notes;
+      } else {
+        notesBox.classList.add('hidden');
+      }
+
+      document.getElementById('cardCounter').textContent = `${idx + 1} / ${list.length}`;
+      const pct = Math.round(((idx + 1) / list.length) * 100);
+      document.getElementById('cardProgressBar').style.width = `${pct}%`;
+    }
+
+    function flipCard() {
+      soundTap();
+      const flipper = document.getElementById('cardFlipper');
+      APP.cards.flipped = !APP.cards.flipped;
+      if (APP.cards.flipped) {
+        flipper.classList.add('flipped');
+      } else {
+        flipper.classList.remove('flipped');
+      }
+    }
+
+    function reviewCard(isKnown) {
+      const current = APP.cards.list[APP.cards.index];
+      if (current) {
+        const item = APP.words.find(w => w.id === current.id);
+        if (item) {
+          item.known = isKnown;
+          saveStorage();
+        }
+      }
+
+      if (isKnown) {
+        soundSuccess();
+      } else {
+        soundError();
+      }
+
+      if (APP.cards.index >= APP.cards.list.length - 1) {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+        showToast("Отличный прогон! Все карточки пройдены 🎉");
+        APP.cards.index = 0;
+      } else {
+        APP.cards.index++;
+      }
+      renderCurrentCard();
+    }
+
+    function shuffleCards() {
+      soundTap();
+      APP.cards.list.sort(() => Math.random() - 0.5);
+      APP.cards.index = 0;
+      renderCurrentCard();
+      showToast("Карточки перемешаны 🔀");
+    }
+
+    // Touch Swipe Handler for mobile gestures
+    let touchStartX = 0;
+    let touchStartY = 0;
+    function setupCardSwipeEvents() {
+      const cardBox = document.getElementById('cardSwipeContainer');
+      if (cardBox.dataset.swipeInit) return;
+      cardBox.dataset.swipeInit = 'true';
+
+      cardBox.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      cardBox.addEventListener('touchend', e => {
+        const diffX = e.changedTouches[0].screenX - touchStartX;
+        const diffY = e.changedTouches[0].screenY - touchStartY;
+
+        // Ensure horizontal swipe
+        if (Math.abs(diffX) > 55 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX > 0) {
+            // Swiped right -> Knows it
+            reviewCard(true);
+          } else {
+            // Swiped left -> Needs review
+            reviewCard(false);
+          }
+        }
+      }, { passive: true });
+    }
+
+    /* ================= 2. QUIZ MODE ================= */
+    function startQuizMode() {
+      generateQuizQuestion();
+    }
+
+    function generateQuizQuestion() {
+      const list = getActiveCategoryWords();
+      if (list.length < 2) {
+        showToast("Нужно минимум 2 слова для теста!");
+        switchNav('hub');
+        return;
+      }
+
+      APP.quiz.answered = false;
+      document.getElementById('quizNextBtn').classList.add('hidden');
+
+      const target = list[Math.floor(Math.random() * list.length)];
+      APP.quiz.current = target;
+
+      document.getElementById('quizCatBadge').textContent = target.category;
+      document.getElementById('quizTerm').textContent = target.latin;
+      document.getElementById('quizGenderGrammar').textContent = target.grammar || '';
+
+      const otherWords = APP.words.filter(w => w.id !== target.id);
+      const shuffledOthers = [...otherWords].sort(() => Math.random() - 0.5);
+      const distractors = shuffledOthers.slice(0, 3);
+      const options = [...distractors, target].sort(() => Math.random() - 0.5);
+
+      const container = document.getElementById('quizOptionsList');
+      container.innerHTML = '';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full p-4 rounded-2xl bg-slate-800/90 border-2 border-slate-700/80 text-white font-medium text-xs sm:text-sm text-left hover:border-emerald-400 transition tap-scale flex items-center justify-between";
+        btn.innerHTML = `
+          <span>${escapeHtml(opt.russian)}</span>
+          <i data-lucide="circle" class="w-4 h-4 text-slate-500 opt-ico"></i>
+        `;
+        btn.onclick = () => handleQuizSelect(opt, btn);
+        container.appendChild(btn);
+      });
+
+      document.getElementById('quizScoreDisplay').textContent = `${APP.stats.correct} / ${APP.stats.totalAnswered}`;
+      document.getElementById('quizComboCount').textContent = APP.stats.streak;
+      lucide.createIcons();
+    }
+
+    function handleQuizSelect(option, button) {
+      if (APP.quiz.answered) return;
+      APP.quiz.answered = true;
+
+      const target = APP.quiz.current;
+      const isCorrect = option.id === target.id;
+
+      APP.stats.totalAnswered++;
+
+      if (isCorrect) {
+        APP.stats.correct++;
+        APP.stats.streak++;
+        soundSuccess();
+        button.classList.remove('border-slate-700/80', 'bg-slate-800/90');
+        button.classList.add('border-emerald-500', 'bg-emerald-950/70', 'text-emerald-200');
+        const ico = button.querySelector('.opt-ico');
+        if (ico) {
+          ico.setAttribute('data-lucide', 'check-circle-2');
+          ico.classList.remove('text-slate-500');
+          ico.classList.add('text-emerald-400');
+        }
+      } else {
+        APP.stats.streak = 0;
+        soundError();
+        button.classList.remove('border-slate-700/80', 'bg-slate-800/90');
+        button.classList.add('border-rose-500', 'bg-rose-950/70', 'text-rose-200');
+        const ico = button.querySelector('.opt-ico');
+        if (ico) {
+          ico.setAttribute('data-lucide', 'x-circle');
+          ico.classList.remove('text-slate-500');
+          ico.classList.add('text-rose-400');
+        }
+
+        // Highlight correct option
+        const allBtns = document.querySelectorAll('#quizOptionsList button');
+        allBtns.forEach(b => {
+          if (b.innerText.includes(target.russian)) {
+            b.classList.remove('border-slate-700/80');
+            b.classList.add('border-emerald-500', 'bg-emerald-950/50');
+          }
+        });
+      }
+
+      document.getElementById('quizComboCount').textContent = APP.stats.streak;
+      document.getElementById('quizScoreDisplay').textContent = `${APP.stats.correct} / ${APP.stats.totalAnswered}`;
+      document.getElementById('quizNextBtn').classList.remove('hidden');
+      updateMetrics();
+      lucide.createIcons();
+    }
+
+    /* ================= 3. TYPING & SPELLING MODE ================= */
+    function startTypingMode() {
+      setupNextTyping();
+    }
+
+    function setupNextTyping() {
+      const list = getActiveCategoryWords();
+      if (list.length === 0) return;
+
+      const randomWord = list[Math.floor(Math.random() * list.length)];
+      APP.typing.current = randomWord;
+
+      document.getElementById('typingCatBadge').textContent = randomWord.category;
+      document.getElementById('typingTargetRussian').textContent = randomWord.russian;
+      document.getElementById('typingHintGrammar').textContent = randomWord.grammar ? `род / скл: ${randomWord.grammar}` : 'латинский ввод';
+
+      const input = document.getElementById('typingInputBox');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+
+      const fb = document.getElementById('typingFeedbackBox');
+      fb.className = "hidden p-3 rounded-2xl text-xs font-semibold";
+      fb.textContent = '';
+
+      document.getElementById('btnTypingCheck').classList.remove('hidden');
+      document.getElementById('btnTypingNext').classList.add('hidden');
+    }
+
+    function checkTypingAnswer(e) {
+      e.preventDefault();
+      const current = APP.typing.current;
+      if (!current) return;
+
+      const input = document.getElementById('typingInputBox');
+      const user = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+      const correct = current.latin.trim().toLowerCase().replace(/\s+/g, ' ');
+
+      const fb = document.getElementById('typingFeedbackBox');
+      fb.classList.remove('hidden');
+
+      if (user === correct) {
+        soundSuccess();
+        fb.className = "p-3 rounded-2xl text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        fb.innerHTML = `Отлично! Точный латинский термин: <b class="latin-serif font-bold text-white">${current.latin}</b>`;
+        input.disabled = true;
+        document.getElementById('btnTypingCheck').classList.add('hidden');
+        document.getElementById('btnTypingNext').classList.remove('hidden');
+      } else {
+        soundError();
+        fb.className = "p-3 rounded-2xl text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        fb.innerHTML = `Ошибка! Правильно: <b class="latin-serif font-bold text-white underline">${current.latin}</b>`;
+      }
+    }
+
+    function giveTypingHintLetter() {
+      soundTap();
+      const current = APP.typing.current;
+      if (!current) return;
+      const input = document.getElementById('typingInputBox');
+      if (input.value.length < current.latin.length) {
+        input.value = current.latin.slice(0, input.value.length + 1);
+      }
+      input.focus();
+    }
+
+    function insertTypingLetter(char) {
+      soundTap();
+      const input = document.getElementById('typingInputBox');
+      input.value += char;
+      input.focus();
+    }
+
+    /* ================= 4. MATCH GAME ================= */
+    function startMatchGame() {
+      const list = getActiveCategoryWords();
+      if (list.length < 4) {
+        showToast("Для игры нужно минимум 4 термина в категории!");
+        switchNav('hub');
+        return;
+      }
+
+      const shuffled = [...list].sort(() => Math.random() - 0.5);
+      const chosen = shuffled.slice(0, 6);
+
+      const tiles = [];
+      chosen.forEach(item => {
+        tiles.push({ id: item.id, text: item.latin, type: 'latin', matched: false });
+        tiles.push({ id: item.id, text: item.russian, type: 'russian', matched: false });
+      });
+
+      tiles.sort(() => Math.random() - 0.5);
+
+      APP.match.tiles = tiles;
+      APP.match.first = null;
+      APP.match.left = chosen.length;
+      document.getElementById('matchPairsCount').textContent = `${chosen.length} пар`;
+
+      if (APP.match.timer) clearInterval(APP.match.timer);
+      APP.match.sec = 0;
+      updateMatchTimer();
+      APP.match.timer = setInterval(() => {
+        APP.match.sec++;
+        updateMatchTimer();
+      }, 1000);
+
+      renderMatchTiles();
+    }
+
+    function updateMatchTimer() {
+      const s = APP.match.sec;
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      document.getElementById('matchTimerText').textContent = `${mm}:${ss}`;
+    }
+
+    function renderMatchTiles() {
+      const grid = document.getElementById('matchTilesGrid');
+      grid.innerHTML = '';
+
+      APP.match.tiles.forEach((tile, index) => {
+        const btn = document.createElement('button');
+        btn.className = `h-20 sm:h-24 p-2.5 rounded-2xl border text-xs font-semibold flex items-center justify-center text-center transition tap-scale select-none ${
+          tile.matched
+            ? 'opacity-0 pointer-events-none scale-75'
+            : 'bg-slate-800/90 border-slate-700 text-slate-100 hover:border-emerald-400'
+        }`;
+        btn.innerHTML = `<span class="${tile.type === 'latin' ? 'latin-serif text-emerald-300 font-bold' : 'text-slate-200'}">${escapeHtml(tile.text)}</span>`;
+        btn.onclick = () => handleMatchClick(tile, index, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleMatchClick(tile, idx, el) {
+      if (tile.matched) return;
+      soundTap();
+
+      if (!APP.match.first) {
+        APP.match.first = { tile, idx, el };
+        el.classList.remove('border-slate-700', 'bg-slate-800/90');
+        el.classList.add('border-emerald-400', 'bg-emerald-950/70', 'ring-2', 'ring-emerald-400/50');
+        return;
+      }
+
+      if (APP.match.first.idx === idx) return;
+
+      const first = APP.match.first;
+
+      if (first.tile.id === tile.id && first.tile.type !== tile.type) {
+        // MATCHED!
+        soundSuccess();
+        el.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-400');
+        first.el.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-400');
+
+        setTimeout(() => {
+          first.tile.matched = true;
+          tile.matched = true;
+          APP.match.left--;
+          document.getElementById('matchPairsCount').textContent = `${APP.match.left} пар`;
+          APP.match.first = null;
+          renderMatchTiles();
+
+          if (APP.match.left <= 0) {
+            clearInterval(APP.match.timer);
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 } });
+            showToast(`Победа! Все пары собраны за ${document.getElementById('matchTimerText').textContent}!`);
+          }
+        }, 300);
+
+      } else {
+        // MISMATCH
+        soundError();
+        el.classList.add('border-rose-500', 'bg-rose-950/70');
+        first.el.classList.add('border-rose-500', 'bg-rose-950/70');
+
+        setTimeout(() => {
+          el.classList.remove('border-rose-500', 'bg-rose-950/70', 'border-emerald-400', 'bg-emerald-950/70', 'ring-2', 'ring-emerald-400/50');
+          first.el.classList.remove('border-rose-500', 'bg-rose-950/70', 'border-emerald-400', 'bg-emerald-950/70', 'ring-2', 'ring-emerald-400/50');
+          el.classList.add('border-slate-700', 'bg-slate-800/90');
+          first.el.classList.add('border-slate-700', 'bg-slate-800/90');
+          APP.match.first = null;
+        }, 450);
+      }
+    }
+
+    /* ================= 5. DICTIONARY MANAGEMENT ================= */
+    function renderDictList() {
+      const search = (document.getElementById('dictSearchBox').value || '').toLowerCase().trim();
+      const listContainer = document.getElementById('dictWordsList');
+      const emptyPrompt = document.getElementById('dictEmptyPrompt');
+
+      const filtered = APP.words.filter(w => {
+        const inSearch = w.latin.toLowerCase().includes(search) || w.russian.toLowerCase().includes(search);
+        const inCat = (APP.filterCat === 'all') || w.category === APP.filterCat;
+        return inSearch && inCat;
+      });
+
+      listContainer.innerHTML = '';
+
+      if (filtered.length === 0) {
+        emptyPrompt.classList.remove('hidden');
+      } else {
+        emptyPrompt.classList.add('hidden');
+        filtered.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-between gap-3";
+          card.innerHTML = `
+            <div class="space-y-0.5 flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="latin-serif font-bold text-sm text-white truncate">${escapeHtml(item.latin)}</span>
+                ${item.grammar ? `<span class="text-[10px] font-mono px-1.5 py-0.2 bg-slate-700 rounded text-slate-300">${escapeHtml(item.grammar)}</span>` : ''}
+                ${item.known ? '<span class="text-[9px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded font-bold">усвоено</span>' : ''}
+              </div>
+              <p class="text-xs text-slate-300 truncate">${escapeHtml(item.russian)}</p>
+              <div class="text-[10px] text-slate-400">${escapeHtml(item.category)} ${item.notes ? `• ${escapeHtml(item.notes)}` : ''}</div>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button onclick="openWordModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-emerald-400 tap-scale">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteWordItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 tap-scale">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `;
+          listContainer.appendChild(card);
+        });
+      }
+      lucide.createIcons();
+    }
+
+    function openWordModal(id = null) {
+      soundTap();
+      const modal = document.getElementById('modalWord');
+      const title = document.getElementById('modalWordTitle');
+      const form = document.querySelector('#modalWord form');
+      form.reset();
+
+      if (id) {
+        const item = APP.words.find(w => w.id === id);
+        if (item) {
+          title.textContent = "Редактировать термин";
+          document.getElementById('formWordId').value = item.id;
+          document.getElementById('formLatin').value = item.latin;
+          document.getElementById('formRussian').value = item.russian;
+          document.getElementById('formCategory').value = item.category;
+          document.getElementById('formGrammar').value = item.grammar || '';
+          document.getElementById('formNotes').value = item.notes || '';
+        }
+      } else {
+        title.textContent = "Добавить новый термин";
+        document.getElementById('formWordId').value = '';
+        if (APP.filterCat !== 'all') {
+          document.getElementById('formCategory').value = APP.filterCat;
+        }
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeWordModal() {
+      document.getElementById('modalWord').classList.add('hidden');
+    }
+
+    function saveWordForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('formWordId').value;
+      const latin = document.getElementById('formLatin').value.trim();
+      const russian = document.getElementById('formRussian').value.trim();
+      const category = document.getElementById('formCategory').value.trim() || 'Общая анатомия';
+      const grammar = document.getElementById('formGrammar').value.trim();
+      const notes = document.getElementById('formNotes').value.trim();
+
+      if (id) {
+        const item = APP.words.find(w => w.id === id);
+        if (item) {
+          item.latin = latin;
+          item.russian = russian;
+          item.category = category;
+          item.grammar = grammar;
+          item.notes = notes;
+          showToast("Термин обновлен!");
+        }
+      } else {
+        APP.words.unshift({
+          id: 'v-' + Date.now(),
+          latin,
+          russian,
+          category,
+          grammar,
+          notes,
+          known: false
+        });
+        showToast("Новый термин записан!");
+      }
+
+      saveStorage();
+      closeWordModal();
+      renderDictList();
+    }
+
+    function deleteWordItem(id) {
+      soundTap();
+      APP.words = APP.words.filter(w => w.id !== id);
+      saveStorage();
+      renderDictList();
+      showToast("Термин удален");
+    }
+
+    /* ================= 6. SYNC (CLIPBOARD, QR, FILES) ================= */
+    function openSyncModal() {
+      soundTap();
+      document.getElementById('modalSync').classList.remove('hidden');
+    }
+
+    function closeSyncModal() {
+      document.getElementById('modalSync').classList.add('hidden');
+    }
+
+    function copyAllWordsToClipboard() {
+      soundTap();
+      const jsonText = JSON.stringify(APP.words, null, 2);
+      
+      // Fallback for clipboard inside iframe
+      const dummy = document.createElement('textarea');
+      dummy.value = jsonText;
+      document.body.appendChild(dummy);
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      showToast("Резервная копия скопирована! Отправь себе в Избранное.");
+    }
+
+    async function pasteWordsFromClipboard() {
+      soundTap();
+      const text = prompt("Вставь скопированный текст из Telegram / WhatsApp сюда:");
+      if (!text) return;
+
+      try {
+        const imported = JSON.parse(text);
+        if (Array.isArray(imported) && imported.length > 0) {
+          APP.words = imported;
+          saveStorage();
+          renderDictList();
+          showToast(`Импортировано ${imported.length} терминов! 🎉`);
+          closeSyncModal();
+        } else {
+          showToast("Ошибка: неподходящий формат слов.");
+        }
+      } catch (err) {
+        showToast("Ошибка: поврежденный текст JSON.");
+      }
+    }
+
+    function generateSyncQR() {
+      soundTap();
+      const container = document.getElementById('qrContainer');
+      const canvasBox = document.getElementById('qrCanvas');
+      container.classList.remove('hidden');
+
+      // Minimal payload: terms
+      const miniData = APP.words.map(w => ({ l: w.latin, r: w.russian, c: w.category }));
+      const payload = JSON.stringify(miniData);
+
+      try {
+        // QR Code generation
+        const qr = qrcode(0, 'M');
+        qr.addData(payload);
+        qr.make();
+        canvasBox.innerHTML = qr.createImgTag(4, 8);
+        showToast("QR-код сгенерирован!");
+      } catch (err) {
+        // Fallback for very large datasets
+        canvasBox.innerHTML = `
+          <div class="p-4 text-slate-800 text-xs text-center">
+            База слишком большая для 1 QR-кода. <br/>
+            Используй кнопку <b>«Скопировать всё»</b> выше!
+          </div>
+        `;
+      }
+    }
+
+    function exportJSONFile() {
+      soundTap();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(APP.words, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `vetlatina_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Файл .json скачан!");
+    }
+
+    function importJSONFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const list = JSON.parse(e.target.result);
+          if (Array.isArray(list)) {
+            APP.words = list;
+            saveStorage();
+            renderDictList();
+            showToast(`Успешно загружено ${list.length} терминов!`);
+            closeSyncModal();
+          }
+        } catch (err) {
+          showToast("Ошибка чтения файла .json");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* ================= 7. INSTALL PWA MODAL ================= */
+    function openInstallModal() {
+      soundTap();
+      document.getElementById('modalInstall').classList.remove('hidden');
+    }
+
+    function closeInstallModal() {
+      document.getElementById('modalInstall').classList.add('hidden');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      APP.deferredPrompt = e;
+      const pwaBtn = document.getElementById('pwaInstallPromptBtn');
+      if (pwaBtn) pwaBtn.classList.remove('hidden');
+    });
+
+    function triggerAndroidPWAInstall() {
+      if (!APP.deferredPrompt) return;
+      APP.deferredPrompt.prompt();
+      APP.deferredPrompt.userChoice.then((res) => {
+        if (res.outcome === 'accepted') {
+          showToast("Приложение установлено на телефон!");
+        }
+        APP.deferredPrompt = null;
+        closeInstallModal();
+      });
+    }
+
+    /* Helper Utilities */
+    function showToast(text) {
+      const toast = document.getElementById('appToast');
+      const toastText = document.getElementById('appToastText');
+      toastText.textContent = text;
+      toast.classList.remove('-translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/'/g, "\\'");
+    }
+
+    /* App Boot */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      updateMetrics();
+      renderCategoryPills();
+      switchNav('hub');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
