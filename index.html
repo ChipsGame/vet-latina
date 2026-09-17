@@ -13,9 +13,117 @@
   <meta name="theme-color" content="#065f46" />
   <meta name="description" content="Карманный интерактивный тренажер ветеринарной латыни и расписание пар." />
 
-  <!-- App Icon as embedded SVG Data URI -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23059669'/%3E%3Cpath d='M30 40 C30 35, 35 30, 40 30 C45 30, 50 35, 50 40 C50 45, 45 50, 40 50 C35 50, 30 45, 30 40 Z' fill='white'/%3E%3Ccircle cx='65' cy='36' r='9' fill='white'/%3E%3Ccircle cx='25' cy='52' r='7' fill='white'/%3E%3Ccircle cx='75' cy='52' r='7' fill='white'/%3E%3Cpath d='M35 60 C30 65, 32 78, 50 82 C68 78, 70 65, 65 60 C60 55, 40 55, 35 60 Z' fill='white'/%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23059669'/%3E%3Cpath d='M30 40 C30 35, 35 30, 40 30 C45 30, 50 35, 50 40 C50 45, 45 50, 40 50 C35 50, 30 45, 30 40 Z' fill='white'/%3E%3Ccircle cx='65' cy='36' r='9' fill='white'/%3E%3Ccircle cx='25' cy='52' r='7' fill='white'/%3E%3Ccircle cx='75' cy='52' r='7' fill='white'/%3E%3Cpath d='M35 60 C30 65, 32 78, 50 82 C68 78, 70 65, 65 60 C60 55, 40 55, 35 60 Z' fill='white'/%3E%3C/svg%3E" />
+  <!-- Dynamic High-Resolution PNG App Icon & Manifest Generator -->
+  <script>
+    (function setupAppIconsAndManifest() {
+      // Генерация четкой изумрудной иконки с лапкой 512x512 в формате PNG
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      // Изумрудный градиент фона
+      const grad = ctx.createLinearGradient(0, 0, 512, 512);
+      grad.addColorStop(0, '#059669');
+      grad.addColorStop(1, '#064e3b');
+      ctx.fillStyle = grad;
+
+      // Скругленные углы (squircle)
+      const r = 112;
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(512 - r, 0);
+      ctx.quadraticCurveTo(512, 0, 512, r);
+      ctx.lineTo(512, 512 - r);
+      ctx.quadraticCurveTo(512, 512, 512 - r, 512);
+      ctx.lineTo(r, 512);
+      ctx.quadraticCurveTo(0, 512, 0, 512 - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Белая анатомическая лапка с мягкой тенью
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.28)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 10;
+
+      // Центральная подушечка лапки
+      ctx.beginPath();
+      ctx.moveTo(256, 250);
+      ctx.bezierCurveTo(318, 250, 368, 296, 368, 356);
+      ctx.bezierCurveTo(368, 416, 320, 442, 256, 442);
+      ctx.bezierCurveTo(192, 442, 144, 416, 144, 356);
+      ctx.bezierCurveTo(144, 296, 194, 250, 256, 250);
+      ctx.fill();
+
+      // 4 подушечки пальцев
+      ctx.beginPath();
+      ctx.ellipse(135, 230, 36, 48, -0.38, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(215, 160, 40, 56, -0.12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(297, 160, 40, 56, 0.12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(377, 230, 36, 48, 0.38, 0, Math.PI * 2);
+      ctx.fill();
+
+      const pngDataUrl = canvas.toDataURL('image/png');
+      window.__appIconPng = pngDataUrl;
+
+      // Для iOS Safari (строго формат PNG!)
+      const appleTouch = document.createElement('link');
+      appleTouch.rel = 'apple-touch-icon';
+      appleTouch.href = pngDataUrl;
+      document.head.appendChild(appleTouch);
+
+      // Favicon для браузера
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/png';
+      favicon.href = pngDataUrl;
+      document.head.appendChild(favicon);
+
+      // Манифест PWA для Android с размерами icons
+      const manifestObj = {
+        name: "VetLatina — Ветеринарная Латынь & Расписание",
+        short_name: "VetLatina",
+        description: "Анатомия латыни и расписание пар для ветеринаров",
+        start_url: window.location.href,
+        display: "standalone",
+        background_color: "#0f172a",
+        theme_color: "#065f46",
+        orientation: "portrait",
+        icons: [
+          {
+            src: pngDataUrl,
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: pngDataUrl,
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          }
+        ]
+      };
+
+      const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = URL.createObjectURL(blob);
+      document.head.appendChild(manifestLink);
+    })();
+  </script>
 
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -161,7 +269,7 @@
             Анатомия, карточки & пары
           </h1>
           <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-md">
-            23 термина с ваших пар уже загружены! Учите слова на перемене, следите за расписанием и добавляйте новые термины без обязательных полей.
+            Учите слова на перемене, следите за расписанием и добавляйте новые термины без обязательных полей.
           </p>
 
           <div class="pt-2 flex flex-wrap gap-2">
@@ -390,7 +498,7 @@
 
       <div id="quizOptionsList" class="grid grid-cols-1 gap-2.5"></div>
 
-      <button id="quizNextBtn" onclick="generateQuizQuestion()" class="hidden w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tap-scale shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+      <button id="quizNextBtn" onclick="nextQuizQuestion()" class="hidden w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tap-scale shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
         <span>Следующий термин</span>
         <i data-lucide="arrow-right" class="w-4 h-4"></i>
       </button>
@@ -449,7 +557,7 @@
           <button type="submit" id="btnTypingCheck" class="flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tap-scale shadow-md">
             Проверить
           </button>
-          <button type="button" id="btnTypingNext" onclick="setupNextTyping()" class="hidden flex-1 py-3.5 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm tap-scale">
+          <button type="button" id="btnTypingNext" onclick="nextTypingWord()" class="hidden flex-1 py-3.5 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm tap-scale">
             Дальше <i data-lucide="arrow-right" class="w-4 h-4 inline"></i>
           </button>
         </div>
@@ -802,12 +910,24 @@
       </div>
 
       <div class="space-y-3 text-xs">
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center gap-3.5">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 flex-shrink-0">
+            <i data-lucide="paw-print" class="w-8 h-8"></i>
+          </div>
+          <div>
+            <div class="font-bold text-white text-sm">Иконка приложения</div>
+            <p class="text-[11px] text-slate-400">Генерируется в высоком разрешении PNG для рабочего стола</p>
+          </div>
+        </div>
+
         <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1.5">
           <span class="font-bold text-emerald-400 flex items-center gap-1.5">
             <i data-lucide="apple" class="w-4 h-4"></i> На iPhone (Safari):
           </span>
           <p class="text-[11px] text-slate-300 leading-relaxed">
-            Нажмите кнопку <b>«Поделиться»</b> (квадрат со стрелкой вверх) $\to$ <b>«На экран "Домой"»</b>.
+            1. Удалите старый ярлык с экрана Домой.<br>
+            2. Откройте сайт в Safari и <b>обновите страницу</b> (потяните вниз).<br>
+            3. Нажмите <b>«Поделиться»</b> $\to$ <b>«На экран "Домой"»</b>.
           </p>
         </div>
 
@@ -816,7 +936,7 @@
             <i data-lucide="play" class="w-4 h-4"></i> На Android (Chrome):
           </span>
           <p class="text-[11px] text-slate-300 leading-relaxed">
-            Нажмите меню три точки $\to$ <b>«Установить приложение»</b> или <b>«Добавить на главный экран»</b>.
+            Нажмите три точки $\to$ <b>«Установить приложение»</b>.
           </p>
         </div>
       </div>
@@ -869,8 +989,8 @@
       sound: true,
       stats: { totalAnswered: 0, correct: 0, streak: 0 },
       cards: { list: [], index: 0, flipped: false },
-      quiz: { current: null, answered: false },
-      typing: { current: null },
+      quiz: { list: [], index: 0, current: null, answered: false },
+      typing: { list: [], index: 0, current: null },
       match: { tiles: [], first: null, left: 0, timer: null, sec: 0 }
     };
 
@@ -947,11 +1067,11 @@
         if (rawW) {
           APP.words = JSON.parse(rawW);
         } else {
-          APP.words = [...STARTER_VET_WORDS];
+          APP.words = JSON.parse(JSON.stringify(STARTER_VET_WORDS));
           saveStorage();
         }
       } catch (e) {
-        APP.words = [...STARTER_VET_WORDS];
+        APP.words = JSON.parse(JSON.stringify(STARTER_VET_WORDS));
       }
 
       try {
@@ -966,6 +1086,13 @@
         APP.schedule = JSON.parse(JSON.stringify(STARTER_SCHEDULE));
       }
 
+      try {
+        const rawStats = localStorage.getItem('vetlatina_stats_fresh');
+        if (rawStats) {
+          APP.stats = JSON.parse(rawStats);
+        }
+      } catch (e) {}
+
       const day = new Date().getDay();
       APP.selectedScheduleDay = (day === 0 || day === 6) ? 1 : day;
     }
@@ -978,6 +1105,13 @@
       renderCategoryPills();
     }
 
+    function saveStats() {
+      try {
+        localStorage.setItem('vetlatina_stats_fresh', JSON.stringify(APP.stats));
+      } catch (e) {}
+      updateMetrics();
+    }
+
     function saveScheduleStorage() {
       try {
         localStorage.setItem('vetlatina_schedule_fresh', JSON.stringify(APP.schedule));
@@ -986,11 +1120,13 @@
     }
 
     function resetToInitial23Words() {
-      APP.words = [...STARTER_VET_WORDS];
+      APP.words = JSON.parse(JSON.stringify(STARTER_VET_WORDS));
+      APP.stats = { totalAnswered: 0, correct: 0, streak: 0 };
       saveStorage();
+      saveStats();
       renderDictList();
       closeSyncModal();
-      showToast("Словарь сброшен к 23 анатомическим терминам!");
+      showToast("Словарь и статистика сброшены к исходным!");
     }
 
     function updateMetrics() {
@@ -1069,6 +1205,11 @@
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
+      if (viewName !== 'match' && APP.match.timer) {
+        clearInterval(APP.match.timer);
+      }
+
+      if (viewName === 'hub') updateMetrics();
       if (viewName === 'dict') renderDictList();
       if (viewName === 'schedule') selectScheduleDay(APP.selectedScheduleDay);
       lucide.createIcons();
@@ -1186,21 +1327,32 @@
     }
 
     function startQuizMode() {
-      generateQuizQuestion();
-    }
-
-    function generateQuizQuestion() {
       const list = getActiveCategoryWords();
       if (list.length < 2) {
         showToast("Нужно минимум 2 слова для теста!");
         switchNav('hub');
         return;
       }
+      APP.quiz.list = [...list].sort(() => Math.random() - 0.5);
+      APP.quiz.index = 0;
+      generateQuizQuestion();
+    }
 
+    function nextQuizQuestion() {
+      APP.quiz.index++;
+      if (APP.quiz.index >= APP.quiz.list.length) {
+        showToast("Круг пройден! Перемешиваем...");
+        APP.quiz.list.sort(() => Math.random() - 0.5);
+        APP.quiz.index = 0;
+      }
+      generateQuizQuestion();
+    }
+
+    function generateQuizQuestion() {
       APP.quiz.answered = false;
       document.getElementById('quizNextBtn').classList.add('hidden');
 
-      const target = list[Math.floor(Math.random() * list.length)];
+      const target = APP.quiz.list[APP.quiz.index];
       APP.quiz.current = target;
 
       document.getElementById('quizCatBadge').textContent = target.category || 'Общее';
@@ -1226,7 +1378,7 @@
         container.appendChild(btn);
       });
 
-      document.getElementById('quizScoreDisplay').textContent = `${APP.stats.correct} / ${APP.stats.totalAnswered}`;
+      document.getElementById('quizScoreDisplay').textContent = `${APP.quiz.index + 1} / ${APP.quiz.list.length}`;
       document.getElementById('quizComboCount').textContent = APP.stats.streak;
       lucide.createIcons();
     }
@@ -1280,8 +1432,8 @@
         });
       }
 
+      saveStats();
       document.getElementById('quizComboCount').textContent = APP.stats.streak;
-      document.getElementById('quizScoreDisplay').textContent = `${APP.stats.correct} / ${APP.stats.totalAnswered}`;
       document.getElementById('quizNextBtn').classList.remove('hidden');
       updateMetrics();
       lucide.createIcons();
@@ -1289,19 +1441,34 @@
 
     /* Spelling Mode */
     function startTypingMode() {
+      const list = getActiveCategoryWords();
+      if (list.length === 0) {
+        showToast("В этой категории пока нет терминов!");
+        switchNav('hub');
+        return;
+      }
+      APP.typing.list = [...list].sort(() => Math.random() - 0.5);
+      APP.typing.index = 0;
+      setupNextTyping();
+    }
+
+    function nextTypingWord() {
+      APP.typing.index++;
+      if (APP.typing.index >= APP.typing.list.length) {
+        showToast("Круг пройден! Перемешиваем...");
+        APP.typing.list.sort(() => Math.random() - 0.5);
+        APP.typing.index = 0;
+      }
       setupNextTyping();
     }
 
     function setupNextTyping() {
-      const list = getActiveCategoryWords();
-      if (list.length === 0) return;
+      const target = APP.typing.list[APP.typing.index];
+      APP.typing.current = target;
 
-      const randomWord = list[Math.floor(Math.random() * list.length)];
-      APP.typing.current = randomWord;
-
-      document.getElementById('typingCatBadge').textContent = randomWord.category || 'Общее';
-      document.getElementById('typingTargetRussian').textContent = randomWord.russian;
-      document.getElementById('typingHintGrammar').textContent = randomWord.grammar ? `род / скл: ${randomWord.grammar}` : 'латинский ввод';
+      document.getElementById('typingCatBadge').textContent = target.category || 'Общее';
+      document.getElementById('typingTargetRussian').textContent = target.russian;
+      document.getElementById('typingHintGrammar').textContent = target.grammar ? `род: ${target.grammar}` : 'латинский ввод';
 
       const input = document.getElementById('typingInputBox');
       input.value = '';
